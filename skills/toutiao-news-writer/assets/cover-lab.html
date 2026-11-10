@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>头条号封面 / 信息图模板</title>
+<style>
+  :root{
+    --ink:#111418;
+    --paper:#f4f1ea;
+    --accent:#e23b2e;
+    --accent2:#f2b705;
+    --dark:#0e1621;
+    --pad:64px;
+    --font:"Source Han Sans SC","Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{width:1280px;height:720px;overflow:hidden;background:#111}
+  body{font-family:var(--font);color:#fff}
+  .canvas{position:relative;width:1280px;height:720px;overflow:hidden;background:var(--dark)}
+  .bg,.imgA,.imgB{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .bg{z-index:0}
+  .shade{position:absolute;inset:0;z-index:1}
+  .grid{position:relative;z-index:2;height:100%;padding:var(--pad);display:flex;flex-direction:column;justify-content:space-between}
+  .top{display:flex;align-items:center;justify-content:space-between;gap:24px}
+  .kicker{font-size:24px;font-weight:700;letter-spacing:.08em;padding:8px 16px;border-radius:4px;background:var(--accent);color:#fff}
+  .badge{font-size:20px;font-weight:600;letter-spacing:.06em;opacity:.9;border:1px solid rgba(255,255,255,.35);padding:6px 14px;border-radius:999px}
+  .main{display:flex;flex-direction:column;gap:20px;max-width:1080px}
+  .title{font-size:76px;line-height:1.18;font-weight:900;letter-spacing:-.01em;text-wrap:balance;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+  .sub{font-size:28px;line-height:1.5;font-weight:500;opacity:.88;max-width:900px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .bottom{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
+  .source{font-size:20px;opacity:.75;letter-spacing:.02em}
+  .brand{font-size:18px;opacity:.55;letter-spacing:.16em}
+  .number{display:none;font-size:190px;line-height:.9;font-weight:900;letter-spacing:-.04em}
+  .number .unit{font-size:64px;font-weight:800;margin-left:10px}
+  .stats{display:none;gap:28px;margin-top:8px}
+  .labels,.divider{display:none}
+  .kicker:empty,.badge:empty,.sub:empty,.source:empty,.number:empty,.stats:empty{display:none}
+  .stat{flex:1;border-left:4px solid var(--accent2);padding-left:18px}
+  .stat b{display:block;font-size:64px;line-height:1.05;font-weight:900}
+  .stat span{display:block;margin-top:8px;font-size:20px;opacity:.8;line-height:1.35}
+
+  /* ---------- 1. photo：现场图 + 渐变压字 ---------- */
+  body[data-style="photo"] .shade{
+    background:linear-gradient(to top,rgba(0,0,0,.92) 0%,rgba(0,0,0,.55) 38%,rgba(0,0,0,.12) 68%,rgba(0,0,0,.35) 100%);
+  }
+  body[data-style="photo"] .grid{justify-content:flex-end;gap:28px}
+  body[data-style="photo"] .top{position:absolute;top:var(--pad);left:var(--pad);right:var(--pad)}
+
+  /* ---------- 2. bignum：深色 + 巨大数字 ---------- */
+  body[data-style="bignum"] .canvas{background:radial-gradient(1200px 600px at 78% 18%,#1d3b57 0%,#0b121b 58%,#080c12 100%)}
+  body[data-style="bignum"] .shade{background:none}
+  body[data-style="bignum"] .number{display:flex;align-items:baseline;gap:12px;color:var(--accent2)}
+  body[data-style="bignum"] .number .unit{margin-left:0}
+  body[data-style="bignum"] .title{font-size:58px;max-width:1040px}
+  body[data-style="bignum"] .main{gap:14px;margin-top:auto;margin-bottom:auto}
+
+  /* ---------- 3. split：左右对比 ---------- */
+  body[data-style="split"] .canvas{background:#0b0b0b}
+  body[data-style="split"] .imgA,body[data-style="split"] .imgB{width:50%;z-index:0}
+  body[data-style="split"] .imgB{left:50%}
+  body[data-style="split"] .shade{background:linear-gradient(to top,rgba(0,0,0,.9),rgba(0,0,0,.18) 55%,rgba(0,0,0,.45));z-index:1}
+  body[data-style="split"] .divider{position:absolute;left:50%;top:0;bottom:0;width:4px;background:#fff;z-index:3;transform:translateX(-2px)}
+  body[data-style="split"] .labels{position:absolute;z-index:4;top:var(--pad);left:var(--pad);right:var(--pad);display:flex;justify-content:space-between;font-size:26px;font-weight:800;letter-spacing:.06em}
+  body[data-style="split"] .labels span{background:rgba(0,0,0,.55);padding:8px 16px;border-radius:4px}
+  body[data-style="split"] .grid{justify-content:flex-end}
+  body[data-style="split"] .kicker,body[data-style="split"] .badge{display:none}
+  body[data-style="split"] .title{font-size:64px;max-width:1120px}
+  body[data-style="split"] .top{display:none}
+
+  /* ---------- 4. bulletin：浅色大字报 ---------- */
+  body[data-style="bulletin"] .canvas{background:var(--paper)}
+  body[data-style="bulletin"] body{color:var(--ink)}
+  body[data-style="bulletin"]{color:var(--ink)}
+  body[data-style="bulletin"] .shade{background:none}
+  body[data-style="bulletin"] .kicker{background:var(--accent);color:#fff}
+  body[data-style="bulletin"] .badge{border-color:rgba(17,20,24,.28);color:var(--ink)}
+  body[data-style="bulletin"] .title{font-size:82px;color:var(--ink)}
+  body[data-style="bulletin"] .sub{color:#3a3f46;opacity:1}
+  body[data-style="bulletin"] .source{color:#5b6168;opacity:1}
+  body[data-style="bulletin"] .brand{color:#8a9098}
+  body[data-style="bulletin"] .top{padding-bottom:18px;border-bottom:3px solid var(--ink)}
+  body[data-style="bulletin"] .main{margin-top:auto;margin-bottom:auto}
+
+  /* ---------- 5. stats：数据信息图 ---------- */
+  body[data-style="stats"] .canvas{background:linear-gradient(135deg,#0d2b2a 0%,#123f3a 55%,#0a1f1e 100%)}
+  body[data-style="stats"] .shade{background:none}
+  body[data-style="stats"] .stats{display:flex}
+  body[data-style="stats"] .title{font-size:56px;max-width:1100px}
+  body[data-style="stats"] .main{margin-top:auto;margin-bottom:auto;gap:18px}
+</style>
+</head>
+<body data-style="photo">
+  <div class="canvas">
+    <img class="bg" id="bg" src="__IMAGE__" onerror="this.style.display='none'" alt="">
+    <img class="imgA" id="imgA" src="__IMAGE_A__" onerror="this.style.display='none'" alt="">
+    <img class="imgB" id="imgB" src="__IMAGE_B__" onerror="this.style.display='none'" alt="">
+    <div class="shade"></div>
+    <div class="divider" id="divider"></div>
+    <div class="labels" id="labels"><span id="labelA">__LABEL_A__</span><span id="labelB">__LABEL_B__</span></div>
+    <div class="grid">
+      <div class="top">
+        <span class="kicker" id="kicker">__KICKER__</span>
+        <span class="badge" id="badge">__BADGE__</span>
+      </div>
+      <div class="main">
+        <div class="number"><span id="number">__NUMBER__</span><span class="unit" id="unit">__UNIT__</span></div>
+        <h1 class="title" id="title">__TITLE__</h1>
+        <p class="sub" id="sub">__SUB__</p>
+        <div class="stats" id="stats">
+          <div class="stat"><b id="stat1">__STAT1__</b><span id="label1">__LABEL1__</span></div>
+          <div class="stat"><b id="stat2">__STAT2__</b><span id="label2">__LABEL2__</span></div>
+          <div class="stat"><b id="stat3">__STAT3__</b><span id="label3">__LABEL3__</span></div>
+        </div>
+      </div>
+      <div class="bottom">
+        <span class="source" id="source">__SOURCE__</span>
+        <span class="brand">头条号 · 资讯</span>
+      </div>
+    </div>
+  </div>
+<script>
+  const q = new URLSearchParams(location.search);
+  const style = q.get('style');
+  if (style) document.body.dataset.style = style;
+
+  const text = (id, key) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const v = q.get(key);
+    if (v !== null && v !== '') el.textContent = v;
+    else if (el.textContent.trim().startsWith('__')) el.textContent = '';
+  };
+  ['kicker','badge','title','sub','source','number','unit','stat1','stat2','stat3','label1','label2','label3','labelA','labelB']
+    .forEach(id => text(id, id));
+
+  // 图片用 __IMAGE__ / __IMAGE_A__ / __IMAGE_B__ 占位符替换；
+  // 留空或未替换时由 onerror 自动隐藏，不会出现破图。
+  ['bg','imgA','imgB'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el.getAttribute('src') || el.getAttribute('src').includes('__')) el.style.display = 'none';
+  });
+
+  // 清理占位符：没填的元素不显示
+  document.querySelectorAll('.kicker,.badge,.sub,.source,.number,.stats,.labels,.divider').forEach(el => {
+    if (el.textContent.includes('__') || (el.querySelector && el.querySelector('*') && [...el.querySelectorAll('*')].some(x => x.textContent.includes('__')))) {
+      if (['__IMAGE__','__IMAGE_A__','__IMAGE_B__'].some(p => el.outerHTML.includes(p))) return;
+      el.style.display = 'none';
+    }
+  });
+  if (document.body.dataset.style !== 'split') {
+    document.getElementById('divider').style.display = 'none';
+    document.getElementById('labels').style.display = 'none';
+  }
+</script>
+</body>
+</html>
