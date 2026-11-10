@@ -1,0 +1,5 @@
+# 评测迭代产物(截图、HTML 输出等)
+.skill-evals/
+
+# 浏览器调试临时文件
+.playwright-mcp/
